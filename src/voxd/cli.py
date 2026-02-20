@@ -4,7 +4,11 @@ import argparse
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
+
+# Suppress Pydantic v1 warnings from sarvamai package
+warnings.filterwarnings("ignore", message=".*Pydantic V1.*", category=UserWarning)
 
 from voxd.core.config import AppConfig
 from voxd.core.config_manager import ConfigManager

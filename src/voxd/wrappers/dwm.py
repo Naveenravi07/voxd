@@ -4,6 +4,10 @@ import argparse
 import os
 import subprocess
 import sys
+import warnings
+
+# Suppress Pydantic v1 warnings from sarvamai package
+warnings.filterwarnings("ignore", message=".*Pydantic V1.*", category=UserWarning)
 
 
 def main(argv: list[str] | None = None) -> int:

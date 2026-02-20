@@ -22,7 +22,7 @@ class DictationService:
             model=config.model,
             language_code=config.language_code,
         )
-        self._set_state("idle")
+        self._set_state("idle", notify=False)
 
     def handle_command(self, command: str) -> str:
         command = command.strip().lower()
@@ -50,8 +50,12 @@ class DictationService:
         self._set_state("idle", output_status)
         return f"recording-stopped text-length={len(text)}"
 
-    def _set_state(self, state: str, output_status: str = "") -> None:
+    def _set_state(self, state: str, output_status: str = "", notify: bool = True) -> None:
         self._config.status_path.write_text(f"{state}\n", encoding="utf-8")
+        
+        if not notify:
+            return
+        
         if state == "recording":
             subprocess.run(
                 ["notify-send", "-u", "low", "-t", "1500", "-a", "voxd", "Recording..."],

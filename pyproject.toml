@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "voxd"
-version = "0.1.0"
+version = "0.1.2"
 description = "Voice dictation daemon for Linux with Sarvam AI STT"
 readme = "README.md"
 requires-python = ">=3.10"
