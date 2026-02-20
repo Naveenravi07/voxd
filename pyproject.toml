@@ -3,20 +3,42 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wisperflow-desktop"
+name = "voxd"
 version = "0.1.0"
-description = "WhisperFlow-style dictation app with modular WM wrappers and Sarvam AI STT"
+description = "Voice dictation daemon for Linux with Sarvam AI STT"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "voxd contributors"}
+]
+keywords = ["voice", "dictation", "stt", "speech-to-text", "linux", "daemon"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Utilities",
+]
 dependencies = [
   "sarvamai>=0.1.15",
 ]
 
+[project.urls]
+Homepage = "https://github.com/yourusername/voxd"
+Repository = "https://github.com/yourusername/voxd"
+Issues = "https://github.com/yourusername/voxd/issues"
+
 [project.scripts]
-wisperflow-daemon = "wisperflow.cli:daemon"
-wisperflow-core = "wisperflow.cli:main"
-wisperflow-dwm = "wisperflow.wrappers.dwm:main"
-wisperflow-hypr = "wisperflow.wrappers.hyprland:main"
+voxd = "voxd.cli:main"
+voxd-daemon = "voxd.cli:daemon"
+voxd-dwm = "voxd.wrappers.dwm:main"
+voxd-hypr = "voxd.wrappers.hyprland:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

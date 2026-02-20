@@ -7,14 +7,14 @@ import sys
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="wisperflow-dwm")
+    parser = argparse.ArgumentParser(prog="voxd-hypr")
     parser.add_argument("command", choices=["toggle", "status", "quit"], nargs="?", default="toggle")
     args = parser.parse_args(argv)
 
     env = dict(os.environ)
-    env.setdefault("WISPERFLOW_OUTPUT_MODE", "x11")
+    env.setdefault("VOXD_OUTPUT_MODE", "wayland")
 
-    cmd = [sys.executable, "-m", "wisperflow.cli", args.command]
+    cmd = [sys.executable, "-m", "voxd.cli", args.command]
     if args.command == "toggle":
         cmd.append("--autostart")
 

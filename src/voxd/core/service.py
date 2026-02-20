@@ -54,7 +54,7 @@ class DictationService:
         self._config.status_path.write_text(f"{state}\n", encoding="utf-8")
         if state == "recording":
             subprocess.run(
-                ["notify-send", "-u", "low", "-t", "1500", "-a", "WisperFlow", "Recording..."],
+                ["notify-send", "-u", "low", "-t", "1500", "-a", "voxd", "Recording..."],
                 check=False,
             )
         else:
@@ -65,7 +65,7 @@ class DictationService:
             else:
                 message = "Stopped"
             subprocess.run(
-                ["notify-send", "-u", "low", "-t", "1500", "-a", "WisperFlow", message],
+                ["notify-send", "-u", "low", "-t", "1500", "-a", "voxd", message],
                 check=False,
             )
 
