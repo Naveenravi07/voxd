@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wisperflow-desktop"
+version = "0.1.0"
+description = "WhisperFlow-style dictation app with modular WM wrappers and Sarvam AI STT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "sarvamai>=0.1.15",
+]
+
+[project.scripts]
+wisperflow-daemon = "wisperflow.cli:daemon"
+wisperflow-core = "wisperflow.cli:main"
+wisperflow-dwm = "wisperflow.wrappers.dwm:main"
+wisperflow-hypr = "wisperflow.wrappers.hyprland:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
