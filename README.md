@@ -49,13 +49,13 @@ exec-once = voxd-daemon
 
 **dwm** - `config.h`:
 ```c
-{ MODKEY, XK_semicolon, spawn, SHCMD("voxd toggle") },
+{ MODKEY, XK_semicolon, spawn, SHCMD("voxd toggle --autostart") },
 ```
 
 
 **hyprland** - `hyprland.conf`:
 ```ini
-bind = SUPER, semicolon, exec, voxd toggle
+bind = SUPER, semicolon, exec, voxd toggle --autostart
 ```
 
 
@@ -66,9 +66,13 @@ Press keybind → talk → press keybind → paste (Ctrl+V)
 
 Terminal:
 ```bash
-voxd toggle    # Start/stop recording
-voxd status    # Check if recording
-voxd quit      # Kill daemon
+voxd toggle             # Start/stop recording
+voxd toggle --autostart # Start daemon if needed, then toggle
+voxd status             # Check if recording
+voxd logs               # Show recent daemon logs
+voxd logs -f            # Follow daemon logs
+voxd logs --path        # Print daemon log path
+voxd quit               # Kill daemon
 ```
 
 ## Config
@@ -90,8 +94,8 @@ Config stored at `~/.config/voxd/config.json`
 
 **WM-specific commands** (if auto-detect fails):
 ```bash
-voxd-dwm toggle     # Force X11 mode
-voxd-hypr toggle    # Force Wayland mode
+voxd-x11 toggle      # Force X11 mode
+voxd-wayland toggle  # Force Wayland mode
 ```
 
 
@@ -99,9 +103,12 @@ voxd-hypr toggle    # Force Wayland mode
 
 **Daemon not running:**
 ```bash
-ps aux | grep voxd
-cat /run/user/$UID/voxd/daemon.log
+voxd toggle --autostart
+voxd status
+voxd logs
 ```
+
+If `voxd toggle` says `daemon-not-running`, either start `voxd-daemon` from your WM/session startup or use `voxd toggle --autostart` in the keybind.
 
 **No clipboard:**
 ```bash

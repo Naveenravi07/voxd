@@ -18,6 +18,10 @@ class AppConfig:
     capture_command: tuple[str, ...]
     output_mode: str
 
+    @property
+    def log_path(self) -> Path:
+        return self.runner_dir / "daemon.log"
+
     @staticmethod
     def from_env(use_config_file: bool = True) -> "AppConfig":
         """Load config from environment, optionally merging with config file."""

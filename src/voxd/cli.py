@@ -23,7 +23,9 @@ def build_parser() -> argparse.ArgumentParser:
         epilog="""
 Examples:
   voxd toggle              Toggle recording
+  voxd toggle --autostart  Start daemon if needed, then toggle
   voxd status              Check daemon status
+  voxd logs                Show daemon logs
   voxd config set api_key sk_xxx    Set API key
   voxd config set language hi-IN    Set language
   voxd config list                  Show all config
@@ -39,6 +41,10 @@ Examples:
     
     sub.add_parser("status", help="Show daemon status (idle/recording)")
     sub.add_parser("quit", help="Stop the daemon")
+    logs = sub.add_parser("logs", help="Show daemon log path or recent daemon logs")
+    logs.add_argument("-f", "--follow", action="store_true", help="Follow daemon logs")
+    logs.add_argument("-n", "--lines", type=int, default=80, help="Number of log lines to show")
+    logs.add_argument("--path", action="store_true", help="Only print the log file path")
 
     # Config commands
     config_parser = sub.add_parser("config", help="Manage configuration")
@@ -63,7 +69,7 @@ Examples:
 
 def _start_daemon(config: AppConfig) -> None:
     config.ensure_runtime_dirs()
-    with (config.runner_dir / "daemon.log").open("a") as log_file:
+    with config.log_path.open("a") as log_file:
         subprocess.Popen(
             [sys.executable, "-m", "voxd.cli", "serve"],
             stdout=log_file,
@@ -75,7 +81,38 @@ def _start_daemon(config: AppConfig) -> None:
 def _send_or_fail(socket_path: Path, command: str) -> str:
     if not socket_path.exists():
         raise RuntimeError("daemon-not-running")
-    return send_command(socket_path, command)
+    try:
+        return send_command(socket_path, command)
+    except (ConnectionRefusedError, FileNotFoundError, OSError) as exc:
+        raise RuntimeError("daemon-not-running") from exc
+
+
+def _daemon_not_running_message(config: AppConfig) -> str:
+    return (
+        "daemon-not-running\n"
+        f"socket: {config.socket_path}\n"
+        f"logs: {config.log_path}\n"
+        "start it with: voxd toggle --autostart"
+    )
+
+
+def _handle_logs_command(config: AppConfig, args: argparse.Namespace) -> int:
+    config.ensure_runtime_dirs()
+
+    if args.path:
+        print(config.log_path)
+        return 0
+
+    if not config.log_path.exists():
+        print(f"No log file yet: {config.log_path}", file=sys.stderr)
+        print("Start the daemon with: voxd toggle --autostart", file=sys.stderr)
+        return 1
+
+    tail_args = ["tail", "-n", str(args.lines)]
+    if args.follow:
+        tail_args.append("-f")
+    tail_args.append(str(config.log_path))
+    return subprocess.call(tail_args)
 
 
 def _handle_config_command(args: argparse.Namespace) -> int:
@@ -126,8 +163,46 @@ def _handle_config_command(args: argparse.Namespace) -> int:
 def daemon(argv: list[str] | None = None) -> int:
     """Entry point for voxd-daemon command."""
     config = AppConfig.from_env()
-    run_server(config)
-    return 0
+    return _run_server_command(config)
+
+
+def _run_server_command(config: AppConfig) -> int:
+    try:
+        run_server(config)
+        return 0
+    except KeyboardInterrupt:
+        return 130
+    except Exception as exc:
+        print(f"daemon-failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"logs: {config.log_path}", file=sys.stderr)
+        return 1
+
+
+def _wait_for_daemon(config: AppConfig, attempts: int = 30) -> bool:
+    for _ in range(attempts):
+        try:
+            if config.socket_path.exists():
+                send_command(config.socket_path, "status")
+                return True
+        except (ConnectionRefusedError, FileNotFoundError, RuntimeError, OSError):
+            pass
+        time.sleep(0.1)
+    return False
+
+
+def _autostart_daemon(config: AppConfig) -> None:
+    if config.socket_path.exists():
+        try:
+            send_command(config.socket_path, "status")
+            return
+        except (ConnectionRefusedError, FileNotFoundError, RuntimeError, OSError):
+            try:
+                config.socket_path.unlink()
+            except FileNotFoundError:
+                pass
+
+    _start_daemon(config)
+    _wait_for_daemon(config)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -141,23 +216,26 @@ def main(argv: list[str] | None = None) -> int:
     config = AppConfig.from_env()
 
     if args.cmd == "serve":
-        run_server(config)
-        return 0
+        return _run_server_command(config)
 
-    if args.cmd == "toggle" and args.autostart and not config.socket_path.exists():
-        _start_daemon(config)
-        for _ in range(25):
-            if config.socket_path.exists():
-                break
-            time.sleep(0.1)
+    if args.cmd == "logs":
+        return _handle_logs_command(config, args)
+
+    if args.cmd == "toggle" and args.autostart:
+        _autostart_daemon(config)
 
     try:
         reply = _send_or_fail(config.socket_path, args.cmd)
     except RuntimeError as exc:
-        print(str(exc), file=sys.stderr)
+        if str(exc) == "daemon-not-running":
+            print(_daemon_not_running_message(config), file=sys.stderr)
+        else:
+            print(str(exc), file=sys.stderr)
         return 1
-    except FileNotFoundError:
-        print("daemon-not-running", file=sys.stderr)
+
+    if reply.startswith("error:"):
+        print(reply, file=sys.stderr)
+        print(f"logs: {config.log_path}", file=sys.stderr)
         return 1
 
     print(reply)

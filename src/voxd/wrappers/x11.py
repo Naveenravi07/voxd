@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", message=".*Pydantic V1.*", category=UserWarnin
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="voxd-dwm")
+    parser = argparse.ArgumentParser(prog="voxd-x11")
     parser.add_argument("command", choices=["toggle", "status", "quit"], nargs="?", default="toggle")
     args = parser.parse_args(argv)
 

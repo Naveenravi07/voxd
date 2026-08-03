@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "voxd"
-version = "0.1.2"
+version = "0.1.4"
 description = "Voice dictation daemon for Linux with Sarvam AI STT"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "voxd contributors"}
 ]
@@ -37,8 +37,8 @@ Issues = "https://github.com/yourusername/voxd/issues"
 [project.scripts]
 voxd = "voxd.cli:main"
 voxd-daemon = "voxd.cli:daemon"
-voxd-dwm = "voxd.wrappers.dwm:main"
-voxd-hypr = "voxd.wrappers.hyprland:main"
+voxd-x11 = "voxd.wrappers.x11:main"
+voxd-wayland = "voxd.wrappers.wayland:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

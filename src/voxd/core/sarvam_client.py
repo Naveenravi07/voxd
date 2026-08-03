@@ -3,13 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from sarvamai import SarvamAI
-
 
 class SarvamSTTClient:
     def __init__(self, api_key: str, model: str, language_code: str):
         if not api_key:
             raise ValueError("Missing SARVAM_API_KEY")
+        from sarvamai import SarvamAI
+
         self._client = SarvamAI(api_subscription_key=api_key)
         self._model = model
         self._language_code = language_code
