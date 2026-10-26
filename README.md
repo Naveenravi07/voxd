@@ -121,4 +121,5 @@ sudo pacman -S wl-clipboard   # Wayland
 ```bash
 voxd config set language hi-IN
 voxd quit && voxd-daemon &
+
 ```
